@@ -27,7 +27,7 @@ import AcercaDeNosotros from './pages/acercaNosotros';
 import ClienteDashboard from "./pages/ClienteDashboard";
 import Configuracion from "./pages/Configuracion";
 import AdminDashboard from "./pages/AdminDashboard"; 
-import HistorialVersiones from "./pages/HistorialVersiones";
+import HistorialVersiones from "./pages/historialVersiones";
 import './App.css';
 import "./index.css";
 

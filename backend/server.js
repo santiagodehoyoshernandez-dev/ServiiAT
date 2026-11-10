@@ -31,7 +31,7 @@ app.get('/', (req, res) => {
 app.use('/api', authRoutes);
 app.use('/api', solicitudRoutes);
 app.use('/api', adminRoutes); // Asegúrate de que admin y tecnico tengan sus propios prefijos si así lo definiste
-app.use('/api/tecnico', tecnicoRoutes); // <--- NUEVA RUTA CONECTADA
+app.use('/api/tecnico', tecnicoRoutes); // 
 app.use('/api', notificacionesRoutes);
 app.use('/api/cliente', clienteRoutes);
 
