@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import "./registro.css";
 
 const Registro = () => {
   const navigate = useNavigate();
-
   const [loading, setLoading] = useState(false);
 
+  // 1. Estado inicial limpio (Sin 'rol')
   const [formData, setFormData] = useState({
     nombre_1: "",
     nombre_2: "",
@@ -19,8 +18,7 @@ const Registro = () => {
     fecha_nacimiento: "",
     email: "",
     telefono: "",
-    direccion: "",
-    rol: "1"
+    direccion: ""
   });
 
   const handleChange = (campo) => (e) =>
@@ -40,17 +38,27 @@ const Registro = () => {
     setLoading(true);
 
     try {
-      // Petición al Backend (que a su vez guarda en Supabase)
+      // 2. Mapeo exacto para el Backend (Sin enviar 'rol')
+      const payload = {
+        nombre_1: formData.nombre_1,
+        nombre_2: formData.nombre_2,
+        apellido_1: formData.apellido_1,
+        apellido_2: formData.apellido_2,
+        tipo_documento: formData.tipo_documento,
+        documento: formData.documento,
+        clave: formData.clave,
+        fecha_nacimiento: formData.fecha_nacimiento,
+        email: formData.email,
+        numero_tel: formData.telefono,
+        direccion_comp: formData.direccion
+      };
+
       const resp = await fetch("http://localhost:3001/api/registro", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          ...formData,
-          numero_tel: formData.telefono,
-          direccion_comp: formData.direccion
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await resp.json();
@@ -59,7 +67,7 @@ const Registro = () => {
         alert("¡Registro Exitoso!");
         navigate('/login');
       } else {
-        alert("Error: " + (data.error || "Revisa los datos"));
+        alert("Error: " + (data.detalle || data.error || "Revisa los datos"));
       }
 
     } catch (err) {
@@ -74,7 +82,6 @@ const Registro = () => {
     <div className="modal-overlay">
       <form className="ventana-registro-grande" onSubmit={handleSubmit}>
 
-        {/* BOTÓN X */}
         <button
           type="button"
           className="btn-cerrar"
@@ -85,43 +92,43 @@ const Registro = () => {
 
         <h2>Crear Cuenta en ServiAT</h2>
 
-        {/* NOMBRES */}
         <div className="flex-row">
           <input
             className="input-field"
             type="text"
             placeholder="Primer Nombre*"
             required
+            value={formData.nombre_1}
             onChange={handleChange('nombre_1')}
           />
-
           <input
             className="input-field"
             type="text"
             placeholder="Segundo Nombre"
+            value={formData.nombre_2}
             onChange={handleChange('nombre_2')}
           />
         </div>
 
-        {/* APELLIDOS */}
         <div className="flex-row">
           <input
             className="input-field"
             type="text"
             placeholder="Primer Apellido*"
             required
+            value={formData.apellido_1}
             onChange={handleChange('apellido_1')}
           />
-
           <input
             className="input-field"
             type="text"
             placeholder="Segundo Apellido"
+            value={formData.apellido_2}
             onChange={handleChange('apellido_2')}
           />
         </div>
 
-        {/* DOCUMENTO Y ROL */}
+        {/* TIPO DE DOCUMENTO Y NÚMERO DE DOCUMENTO (Ahora en la misma fila) */}
         <div className="flex-row">
           <select
             className="input-field select-custom"
@@ -129,93 +136,72 @@ const Registro = () => {
             onChange={handleChange('tipo_documento')}
           >
             <option value="CC">C.C.</option>
-            <option value="TI">T.I.</option>
-            <option value="CE">C.E.</option>
+      
           </select>
 
-          <select
-            className="input-field select-custom"
-            style={{
-              backgroundColor: '#fff4f4',
-              fontWeight: 'bold',
-              borderColor: '#E57373'
-            }}
-            value={formData.rol}
-            onChange={handleChange('rol')}
-          >
-            <option value="1">Soy Cliente</option>
-            <option value="2">Soy Técnico</option>
-            <option value="3">Soy Administrador</option>
-          </select>
-        </div>
-
-        {/* DOCUMENTO Y TELÉFONO */}
-        <div className="flex-row">
           <input
             className="input-field"
             type="text"
             placeholder="Número Documento*"
             required
+            value={formData.documento}
             onChange={handleChange('documento')}
           />
+        </div>
 
+        {/* TELÉFONO SOLITARIO A LO ANCHO */}
+        <div className="flex-row">
           <input
             className="input-field"
+            style={{ width: '100%' }}
             type="text"
             placeholder="Teléfono"
+            value={formData.telefono}
             onChange={handleChange('telefono')}
           />
         </div>
 
-        {/* FECHA Y DIRECCIÓN */}
         <div className="flex-row">
           <div style={{ width: '100%', textAlign: 'left' }}>
-            <label
-              style={{
-                fontSize: '11px',
-                color: '#666',
-                marginLeft: '5px'
-              }}
-            >
+            <label style={{ fontSize: '11px', color: '#666', marginLeft: '5px' }}>
               Fecha Nacimiento*
             </label>
-
             <input
               className="input-field"
               type="date"
               required
+              value={formData.fecha_nacimiento}
               onChange={handleChange('fecha_nacimiento')}
             />
           </div>
-
           <input
             className="input-field"
             style={{ alignSelf: 'flex-end' }}
             type="text"
             placeholder="Dirección"
+            value={formData.direccion}
             onChange={handleChange('direccion')}
           />
         </div>
 
-        {/* EMAIL */}
         <input
           className="input-field"
           type="email"
           placeholder="Correo Electrónico*"
           required
+          value={formData.email}
           onChange={handleChange('email')}
         />
 
-        {/* PASSWORD */}
         <input
           className="input-field"
           type="password"
           placeholder="Contraseña (mín. 8)*"
           required
+          value={formData.clave}
           onChange={handleChange('clave')}
         />
 
-        {/* BOTÓN */}
         <button
           type="submit"
           className="btn-enviar-registro"
@@ -224,11 +210,7 @@ const Registro = () => {
           {loading ? 'Registrando...' : 'Registrarse'}
         </button>
 
-        {/* LOGIN */}
-        <p
-          className="footer-link"
-          onClick={() => navigate('/login')}
-        >
+        <p className="footer-link" onClick={() => navigate('/login')}>
           ¿Ya tienes cuenta? Inicia sesión
         </p>
 

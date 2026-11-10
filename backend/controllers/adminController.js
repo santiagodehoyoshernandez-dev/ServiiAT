@@ -1,4 +1,5 @@
 import { supabase } from '../config/supabase.js';
+import bcrypt from "bcryptjs";
 
 // ==========================================
 // 1. OBTENER SOLICITUDES (ADMIN)
@@ -93,5 +94,56 @@ export const actualizarEstado = async (req, res) => {
   } catch (error) {
     console.error("❌ Error al actualizar estado:", error.message);
     res.status(500).json({ error: error.message });
+  }
+};
+
+// ==========================================
+// 3. REGISTRAR TÉCNICOS Y ADMIN
+// ==========================================
+export const registrarUsuarioPorAdmin = async (req, res) => {
+  const { 
+    nombre_1, nombre_2, apellido_1, apellido_2,
+    tipo_documento, documento, fecha_nacimiento,
+    email, numero_tel, direccion_comp, rol 
+  } = req.body;
+
+  const id_roles = parseInt(rol);
+
+  if (id_roles !== 2 && id_roles !== 3) {
+    return res.status(400).json({ error: "Solo se pueden crear Técnicos o Administradores." });
+  }
+
+  const prefijo = id_roles === 2 ? "Tech" : "Admin";
+  const passwordTemporal = `${prefijo}-${Math.random().toString(36).slice(-6)}*`;
+
+  const salt = bcrypt.genSaltSync(10);
+  const claveHasheada = bcrypt.hashSync(passwordTemporal, salt);
+
+  try {
+    const { data: resultUser, error: errUser } = await supabase
+      .from('usuario')
+      .insert([{
+        nombre_1, nombre_2, apellido_1, apellido_2, 
+        tipo_documento, documento, clave: claveHasheada,
+        fecha_nacimiento, id_roles
+      }])
+      .select();
+
+    if (errUser) throw errUser;
+    const nuevoId = resultUser[0].id_usuario;
+
+    await Promise.all([
+      supabase.from('correo_electronico').insert([{ direccion_email: email, tipo: 'Laboral', id_usuario: nuevoId }]),
+      supabase.from('telefono').insert([{ numero: numero_tel, tipo: 'Celular', id_usuario: nuevoId }]),
+      supabase.from('direccion').insert([{ direccion_completa: direccion_comp, usuario_id_usuario: nuevoId }])
+    ]);
+    
+    console.log(`✅ Empleado creado. Correo: ${email} | Clave temporal: ${passwordTemporal}`);
+    
+    res.json({ mensaje: "Usuario creado y credenciales generadas exitosamente." });
+
+  } catch (error) {
+    console.error("❌ Error al registrar empleado:", error);
+    res.status(500).json({ error: "Error al registrar empleado", detalle: error.message });
   }
 };

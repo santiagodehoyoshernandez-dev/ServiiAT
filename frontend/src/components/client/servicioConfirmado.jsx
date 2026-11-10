@@ -2,7 +2,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Swal from 'sweetalert2';
 
-
 function ServicioConfirmado() {
     const navigate = useNavigate();
     const location = useLocation();
@@ -20,7 +19,7 @@ function ServicioConfirmado() {
         );
     }
 
-    const confirmarEnSupabase = async () => {
+    const confirmarReserva = async () => {
         setCargando(true);
         try {
             const userGuardado = JSON.parse(localStorage.getItem("user"));
@@ -28,66 +27,40 @@ function ServicioConfirmado() {
                 throw new Error("Debes iniciar sesión para agendar un servicio.");
             }
 
-            // 1. Obtener ID de la categoría
-            const { data: catData, error: catError } = await cliente
-                .from('categoria_equipo')
-                .select('id_categoria_equipo')
-                .eq('nombre_categoria', datos.categoria)
-                .single();
-
-            if (catError || !catData) throw new Error("Categoría no encontrada: " + datos.categoria);
-
-            // 2. Obtener ID del estado 'Pendiente'
-            const { data: estadoData, error: estadoError } = await cliente
-                .from('estado')
-                .select('id_estado')
-                .eq('nombre_estado', 'Pendiente')
-                .single();
-
-            if (estadoError || !estadoData) throw new Error("Estado 'Pendiente' no encontrado.");
-
-            const idEstadoPendiente = estadoData.id_estado;
-            const idCategoria = catData.id_categoria_equipo;
-            const idAdministrador = 2; // Ajusta según la estructura de ServiAT
-
-            // 3. Insertar el nuevo equipo
-            const { data: equipoInsertado, error: equipoError } = await cliente
-                .from('equipo')
-                .insert([{
-                    nombre_equipo: datos.equipo,
-                    marca_equipo: "No especificada",
-                    modelo_equipo: datos.modelo || "N/A",
-                    id_categoria_equipo: idCategoria
-                }])
-                .select();
-
-            if (equipoError) throw equipoError;
-            const idDelNuevoEquipo = equipoInsertado[0].id_equipo;
-
-            // 4. Insertar la solicitud final
-            const { error: errorSolicitud } = await cliente
-                .from('solicitud')
-                .insert([{
-                    fecha_solicitud: datos.fecha,
+            // Hacemos una única petición a tu backend en Node
+          const respuesta = await fetch('http://localhost:3001/api/solicitud', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    equipo: datos.equipo,
+                    modelo: datos.modelo,
+                    categoria: datos.categoria,
+                    fecha: datos.fecha,
                     descripcion: datos.descripcion,
-                    direccion_servicio: datos.direccion,
-                    usuario_id_administrador: idAdministrador,
-                    usuario_id_cliente: userGuardado.id,
-                    id_estado_solicitud: idEstadoPendiente,
-                    id_equipo: idDelNuevoEquipo
-                }]);
+                    direccion: datos.direccion,
+                    id_cliente: userGuardado.id
+                })
+            });
 
-            if (errorSolicitud) throw errorSolicitud;
+            if (!respuesta.ok) {
+                const errorData = await respuesta.json();
+                throw new Error(errorData.error || "Error al crear la solicitud en el servidor.");
+            }
 
-            // Notificación vía correo (Backend Node)
+            // Notificación vía correo
             try {
                 await fetch('http://localhost:3001/api/notificaciones/enviar', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({nombreCliente:datos.nombreCliente, email: datos.gmail, estado: "Pendiente",
-                         fecha_solicitud:datos.fecha, hora:datos.hora,
-                        descripcion:datos.descripcion, nombre_equipo:datos.equipo
-                     })
+                    body: JSON.stringify({
+                        nombreCliente: datos.nombreCliente, 
+                        email: datos.gmail, 
+                        estado: "Pendiente",
+                        fecha_solicitud: datos.fecha, 
+                        hora: datos.hora,
+                        descripcion: datos.descripcion, 
+                        nombre_equipo: datos.equipo
+                    })
                 });
             } catch (err) {
                 console.warn("La solicitud se guardó, pero hubo un problema enviando el correo.");
@@ -100,11 +73,11 @@ function ServicioConfirmado() {
                 confirmButtonColor: '#1abc9c'
             });
 
-            // Redirigir al usuario al Home o Dashboard después del éxito
+            // Redirigir al usuario al Home después del éxito
             navigate("/"); 
 
         } catch (error) {
-            console.error("Error en Supabase:", error);
+            console.error("Error en la confirmación:", error);
             Swal.fire({
                 icon: "error",
                 title: "Error al guardar",
@@ -217,7 +190,7 @@ function ServicioConfirmado() {
                                     </button>
                                     
                                     <button
-                                        onClick={confirmarEnSupabase}
+                                        onClick={confirmarReserva}
                                         className="btn btn-success py-3 px-5 rounded-3 fw-bold shadow"
                                         style={{ backgroundColor: '#1abc9c', border: 'none' }}
                                         disabled={cargando}

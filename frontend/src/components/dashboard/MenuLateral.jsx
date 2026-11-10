@@ -2,37 +2,52 @@ import { useNavigate } from "react-router-dom";
 
 function MenuLateral() {
   const navigate = useNavigate();
-
-  // obtener el email del usuario logueado desde localStorage
-  const userEmail = localStorage.getItem("userEmail") || "admin@arservicio.com";
+  
+  // 👉 CORRECCIÓN 1: Leer el correo desde sessionStorage, no de localStorage
+  const userEmail = sessionStorage.getItem("userEmail") || "admin@arservicio.com";
 
   const cerrarSesion = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userRole");
-    localStorage.removeItem("userEmail");
-    navigate("/Login");
+    // Limpiamos absolutamente todo de la sesión
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("rol");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("id_usuario");
+    sessionStorage.removeItem("userEmail");
+    
+    // 👉 CORRECCIÓN 2: Forzar recarga completa para limpiar la memoria de React
+    window.location.href = "/Login";
   };
 
   return (
     <aside className="menu">
       <div className="colores">
-
         <h2 className="logo">AR Servicios Técnicos</h2><br />
         <p className="panel">Panel administrador</p>
 
-
         <div className="usuario">
           <i className="bi bi-person-circle"></i>
-
           <div className="info-usuario">
             <span className="nombre">Admin</span>
             <span className="correo">{userEmail}</span>
           </div>
         </div>
 
-        <button onClick={() => navigate("/admin")}><i className="bi bi-house-add-fill"></i> Dashboard</button>
-        <button onClick={() => navigate("/admin/configuracion")}><i className="bi bi-gear-wide-connected"></i> Configuración</button>
+        {/* BOTONES DE NAVEGACIÓN INDEPENDIENTES */}
+        <button onClick={() => navigate("/admin")}>
+          <i className="bi bi-card-list"></i> Gestión de Solicitudes
+        </button>
 
+        <button onClick={() => navigate("/admin/historial")}>
+          <i className="bi bi-clock-history"></i> Historial
+        </button>
+        
+        <button onClick={() => navigate("/admin/registrar-personal")}>
+          <i className="bi bi-person-plus-fill"></i> Registrar Personal
+        </button>
+
+        <button onClick={() => navigate("/admin/configuracion")}>
+          <i className="bi bi-gear-wide-connected"></i> Configuración
+        </button>
       </div>
 
       <button className="cerrar" onClick={cerrarSesion}>

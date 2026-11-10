@@ -1,161 +1,110 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import "../index.css";
 
-function ClienteDashboard() {
-  const [versiones, setVersiones] = useState([]);
-  const [filtro, setFiltro] = useState("Todos");
-
-  const userEmail = localStorage.getItem("userEmail") || "";
-  const API = "https://69d82a490576c93882592a63.mockapi.io/Formulrio";
+const ClienteDashboard = () => {
+  const [misSolicitudes, setMisSolicitudes] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [errorLocal, setErrorLocal] = useState("");
 
   useEffect(() => {
-    fetch(API)
-      .then(res => res.json())
-      .then(data => {
-        // Filtrar solo las solicitudes del usuario logueado
-        const misServicios = data.filter(item => item.gmail === userEmail);
-        setVersiones(misServicios);
-      })
-      .catch(err => console.log(err));
-  }, [userEmail]);
+    obtenerMiHistorial();
+  }, []);
 
-  const pendientes = versiones.filter(v => v.estado === "Pendiente").length;
-  const proceso = versiones.filter(v => v.estado === "En Proceso").length;
-  const completado = versiones.filter(v => v.estado === "Completado").length;
-  const cancelado = versiones.filter(v => v.estado === "Cancelado").length;
+  async function obtenerMiHistorial() {
+    setCargando(true);
+    setErrorLocal("");
 
-  const filtrados =
-    filtro === "Todos"
-      ? versiones
-      : versiones.filter(v => v.estado === filtro);
+    // ACTUALIZADO: Ahora busca correctamente en sessionStorage
+    const idUsuario = sessionStorage.getItem("id_usuario"); 
+
+    if (!idUsuario) {
+      setErrorLocal("No se encontró tu sesión. Por favor, vuelve a iniciar sesión.");
+      setCargando(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:3001/api/cliente/solicitudes/${idUsuario}`);
+      
+      if (!res.ok) throw new Error("Error al obtener los datos del servidor.");
+      
+      const data = await res.json();
+      setMisSolicitudes(data);
+    } catch (error) {
+      console.error("Error:", error);
+      setErrorLocal("Ocurrió un problema al conectar con el historial.");
+    } finally {
+      setCargando(false);
+    }
+  }
 
   return (
-    <div className="container mt-4">
-
-      <div
-        className="p-4 rounded shadow text-white mb-4"
-        style={{
-          background: "linear-gradient(90deg, #2c4da7, #4a7de0)"
-        }}
-      >
-        <h4 className="mb-1">📋 Historial de Servicios</h4>
-        <small>ServiAT</small>
+    <div className="container p-4 mt-3">
+      <div className="mb-4 text-center">
+        <h2 style={{ color: '#0d47a1', fontWeight: 'bold' }}>
+          {/* ACTUALIZADO: Título e ícono cambiados a Historial */}
+          <i className="bi bi-clock-history me-2"></i> Mi Historial
+        </h2>
+        <p className="text-muted">Aquí puedes rastrear el estado de tus servicios técnicos.</p>
       </div>
 
-      <div className="row text-center mb-4">
-
-        <div className="col">
-          <div className="p-3 bg-warning rounded shadow-sm">
-            <h6>Pendientes</h6>
-            <h4>{pendientes}</h4>
-          </div>
+      {errorLocal && (
+        <div className="alert alert-danger text-center shadow-sm">
+          <i className="bi bi-exclamation-triangle-fill me-2"></i> {errorLocal}
         </div>
+      )}
 
-        <div className="col">
-          <div className="p-3 bg-primary text-white rounded shadow-sm">
-            <h6>En Proceso</h6>
-            <h4>{proceso}</h4>
-          </div>
+      {cargando ? (
+        <div className="text-center py-5">
+          <div className="spinner-border text-primary" role="status"></div>
+          <p className="mt-2 text-muted">Cargando tu historial...</p>
         </div>
-
-        <div className="col">
-          <div className="p-3 bg-success text-white rounded shadow-sm">
-            <h6>Completados</h6>
-            <h4>{completado}</h4>
-          </div>
+      ) : misSolicitudes.length === 0 && !errorLocal ? (
+        <div className="alert alert-info text-center shadow-sm p-4">
+          <i className="bi bi-info-circle fs-1 d-block mb-3"></i>
+          <h5>Aún no tienes solicitudes registradas</h5>
+          <p className="mb-0">Cuando solicites un servicio técnico, aparecerá aquí.</p>
         </div>
+      ) : (
+        <div className="row g-4">
+          {misSolicitudes.map((item) => (
+            <div key={item.id_solicitud} className="col-12 col-md-6 col-lg-4">
+              <div className="card h-100 shadow-sm border-0" style={{ borderRadius: "12px", overflow: "hidden" }}>
+                
+                <div className={`text-white text-center py-2 ${
+                  item.nombre_estado === 'Pendiente' ? 'bg-warning text-dark' :
+                  item.nombre_estado === 'En proceso' ? 'bg-info text-white' :
+                  item.nombre_estado === 'Finalizado' ? 'bg-success' : 'bg-danger'
+                }`}>
+                  <h6 className="m-0 fw-bold">{item.nombre_estado.toUpperCase()}</h6>
+                </div>
 
-        <div className="col">
-          <div className="p-3 bg-danger text-white rounded shadow-sm">
-            <h6>Cancelados</h6>
-            <h4>{cancelado}</h4>
-          </div>
-        </div>
+                <div className="card-body bg-white">
+                  <h5 className="card-title fw-bold text-dark mb-1">
+                    {item.nombre_equipo} {item.marca_equipo && item.marca_equipo !== "No especificada" ? `(${item.marca_equipo})` : ""}
+                  </h5>
+                  <p className="text-muted small mb-3">
+                    <i className="bi bi-calendar me-1"></i> Solicitado el: {item.fecha_solicitud}
+                  </p>
+                  
+                  <div className="bg-light p-3 rounded mb-0">
+                    <p className="small mb-1 fw-bold text-secondary">Problema:</p>
+                    <p className="small mb-0 text-dark" style={{ fontStyle: "italic" }}>"{item.descripcion}"</p>
+                  </div>
+                </div>
 
-      </div>
-
-      <div className="mb-4 d-flex gap-2 flex-wrap">
-        {["Todos", "Pendiente", "En Proceso", "Completado", "Cancelado"].map((f) => (
-          <button
-            key={f}
-            onClick={() => setFiltro(f)}
-            className={`btn ${filtro === f ? "btn-dark" : "btn-outline-dark"
-              }`}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
-
-      {filtrados.map((item) => (
-        <div
-          key={item.id}
-          className="mb-4 p-3 rounded shadow-sm"
-          style={{ background: "#f8f9fc" }}
-        >
-
-          <div className="d-flex justify-content-between">
-
-            <div>
-              <h5 className="fw-bold mb-0">
-                {item.servicio} - {item.equipo}
-              </h5>
-              <small className="text-muted">
-                👤 {item.nombreCliente}
-              </small>
+                <div className="card-footer bg-white border-0 pt-0 pb-3">
+                  <p className="small text-muted mb-0 mt-2">
+                    <i className="bi bi-geo-alt-fill me-1"></i> {item.direccion_servicio}
+                  </p>
+                </div>
+              </div>
             </div>
-
-            <span
-              className={
-                "badge px-3 py-2 " +
-                (item.estado === "Pendiente"
-                  ? "bg-warning text-dark"
-                  : item.estado === "En Proceso"
-                    ? "bg-primary"
-                    : item.estado === "Completado"
-                      ? "bg-success"
-                      : "bg-danger")
-              }
-            >
-              {item.estado}
-            </span>
-          </div>
-
-          <div className="text-muted mt-2">
-            📅 {item.fecha} ⏰ {item.hora}
-          </div>
-
-          <div
-            className="mt-3 p-3"
-            style={{
-              background: "#e9edf5",
-              borderRadius: "10px"
-            }}
-          >
-            {item.descripcion}
-          </div>
-
-          <div className="d-flex justify-content-between mt-3">
-
-            <div>
-              <small className="text-muted">👨‍🔧 Técnico</small>
-              <p className="fw-bold mb-0">
-                {item.tecnico || "No asignado"}
-              </p>
-            </div>
-
-            <div className="text-end">
-              <small className="text-muted">💰 Precio</small>
-              <p className="fw-bold text-success mb-0">
-                ${item.precio || "0"}
-              </p>
-            </div>
-
-          </div>
-
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
-}
+};
 
 export default ClienteDashboard;
