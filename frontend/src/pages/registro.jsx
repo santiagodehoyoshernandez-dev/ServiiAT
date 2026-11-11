@@ -53,7 +53,7 @@ const Registro = () => {
         direccion_comp: formData.direccion
       };
 
-      const resp = await fetch("http://localhost:4000/api/registro", {
+      const resp = await fetch("http://3.90.26.57:4000/api/registro", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

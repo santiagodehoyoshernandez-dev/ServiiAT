@@ -15,7 +15,7 @@ function HistorialVersiones() {
     try {
       setCargando(true);
       
-      const respuesta = await fetch("http://localhost:4000/api/admin/solicitudes");
+      const respuesta = await fetch("http://3.90.26.57:4000/api/admin/solicitudes");
       console.log("📍 PASO 2: Respuesta recibida. Status:", respuesta.status);
       
       if (!respuesta.ok) {

@@ -43,7 +43,7 @@ const RegistroAdmin = () => {
       };
 
       // Apunta al nuevo endpoint protegido que creaste en el backend
-      const resp = await fetch("http://localhost:3001/api/admin/crear-usuario", {
+      const resp = await fetch("http://3.90.26.57:4000/api/admin/crear-usuario", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
