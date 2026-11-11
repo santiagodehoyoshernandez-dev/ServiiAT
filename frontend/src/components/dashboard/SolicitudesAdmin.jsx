@@ -22,7 +22,7 @@ const SolicitudesAdmin = () => {
     setCargando(true);
     setErrorServidor("");
     try {
-      const res = await fetch("http://localhost:3001/api/admin/solicitudes");
+      const res = await fetch("http://localhost:4000/api/admin/solicitudes");
       const data = await res.json();
       if (!res.ok || !Array.isArray(data)) {
         setSolicitudes([]);

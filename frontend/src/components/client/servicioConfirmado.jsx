@@ -28,7 +28,7 @@ function ServicioConfirmado() {
             }
 
             // Hacemos una única petición a tu backend en Node
-          const respuesta = await fetch('http://localhost:3001/api/solicitud', {
+          const respuesta = await fetch('http://localhost:4000/api/solicitud', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
