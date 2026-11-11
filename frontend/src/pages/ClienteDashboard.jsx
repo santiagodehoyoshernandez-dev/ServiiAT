@@ -24,7 +24,7 @@ const ClienteDashboard = () => {
     }
 
     try {
-      const res = await fetch(`http://3.90.26.57:4000/api/cliente/solicitudes/${idUsuario}`);
+      const res = await fetch(`http://52.91.161.249:4000/api/cliente/solicitudes/${idUsuario}`);
       
       if (!res.ok) throw new Error("Error al obtener los datos del servidor.");
       
