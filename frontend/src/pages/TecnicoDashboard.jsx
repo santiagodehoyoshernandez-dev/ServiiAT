@@ -24,7 +24,7 @@ const TecnicoDashboard = () => {
   async function obtenerSolicitudes() {
     setCargando(true);
     try {
-      const res = await fetch("http://52.91.161.249:4000/api/tecnico/solicitudes");
+      const res = await fetch("[http://44.197.89.200:4000/api/tecnico/solicitudes");
       if (!res.ok) throw new Error("Error en el servidor");
       const data = await res.json();
       

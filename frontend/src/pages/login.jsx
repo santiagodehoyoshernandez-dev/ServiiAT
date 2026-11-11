@@ -15,7 +15,7 @@ const Login = ({ setEstaAutenticado, setRol }) => {
     setLoading(true);
 
     try {
-      const resp = await fetch("http://52.91.161.249:4000/api/login", {
+      const resp = await fetch("[http://44.197.89.200:4000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })

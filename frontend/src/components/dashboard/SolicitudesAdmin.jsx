@@ -22,7 +22,7 @@ const SolicitudesAdmin = () => {
     setCargando(true);
     setErrorServidor("");
     try {
-      const res = await fetch("http://52.91.161.249:4000/api/admin/solicitudes");
+      const res = await fetch("[http://44.197.89.200:4000/api/admin/solicitudes");
       const data = await res.json();
       if (!res.ok || !Array.isArray(data)) {
         setSolicitudes([]);
