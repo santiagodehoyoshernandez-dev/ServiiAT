@@ -22,7 +22,8 @@ function ServicioConfirmado() {
     const confirmarReserva = async () => {
         setCargando(true);
         try {
-            const userGuardado = JSON.parse(localStorage.getItem("user"));
+            // CORRECCIÓN 1: Cambiado a sessionStorage
+            const userGuardado = JSON.parse(sessionStorage.getItem("user"));
             if (!userGuardado) {
                 throw new Error("Debes iniciar sesión para agendar un servicio.");
             }
@@ -47,9 +48,9 @@ function ServicioConfirmado() {
                 throw new Error(errorData.error || "Error al crear la solicitud en el servidor.");
             }
 
-            // Notificación vía correo
+            // CORRECCIÓN 2: Cambiado al puerto y la IP de AWS
             try {
-                await fetch('http://localhost:3001/api/notificaciones/enviar', {
+                await fetch('http://44.197.89.200:4000/api/notificaciones/enviar', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
