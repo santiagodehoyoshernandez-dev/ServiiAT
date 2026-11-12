@@ -28,12 +28,11 @@ const Login = ({ setEstaAutenticado, setRol }) => {
         return;
       }
 
-      // Guardado estandarizado en LocalStorage
+      
       sessionStorage.setItem("user", JSON.stringify({ id: data.id, nombre: data.nombre, rol: data.rol }));
       sessionStorage.setItem("token", data.token || data.id);
       sessionStorage.setItem("rol", data.rol);
       
-      // 👉 ESTA ES LA LÍNEA CLAVE QUE HACE FUNCIONAR EL HISTORIAL DEL CLIENTE
       sessionStorage.setItem("id_usuario", data.id);
 
       setEstaAutenticado(true);
