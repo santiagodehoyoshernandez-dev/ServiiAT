@@ -58,7 +58,7 @@ function Formulario() {
             return;
         }
 
-        const userGuardado = JSON.parse(localStorage.getItem("user"));
+        const userGuardado = JSON.parse(sessionStorage.getItem("user"));
         if (!userGuardado) {
             Swal.fire("Atención", "Debes iniciar sesión para agendar un servicio.", "warning");
             return;
