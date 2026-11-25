@@ -1,0 +1,7 @@
+[2026-10-27 18:13:10] === INICIANDO RESPALDO AUTOMATIZADO DE SERVIAT ===
+[2026-10-27 18:13:10] Ejecutando pg_dump para la base de datos de ServiAT...
+[2026-10-27 18:13:21] pg_dump finalizado exitosamente.
+[2026-10-27 18:13:21] Tamaño del archivo: 40K (38478 bytes).
+[2026-10-27 18:13:21] Huella SHA-256 calculada y almacenada.
+[2026-10-27 18:13:21] Permisos de archivo asegurados (600).
+[2026-10-27 18:13:22] === RESPALDO COMPLETADO SATISFACTORIAMENTE: serviat_backup_2026-10-27_18-13-10.dump ===
