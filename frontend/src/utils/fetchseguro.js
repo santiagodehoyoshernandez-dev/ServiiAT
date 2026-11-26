@@ -1,5 +1,5 @@
 export const API_URL = (
-  import.meta.env.VITE_IP_ELASTICA_URL || "https://44.197.89.200:3001"
+  import.meta.env.VITE_IP_ELASTICA_URL || "https://44.197.89.200:4000"
 ).replace(/\/$/, "");
 
 export async function fetchseguro(url, opciones = {}) {
