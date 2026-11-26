@@ -28,7 +28,7 @@ import Configuracion from "./pages/Configuracion";
 import AdminDashboard from "./components/dashboard/AdminDashboard"; 
 import HistorialVersiones from "./pages/historialVersiones";
 import PerfilUsuario from "./pages/PerfilUsuario";
-import RecuperarContrasena from "./componentes/recuperar_contrasena";
+import RecuperarContrasena from "./pages/recuperar_contrasena";
 
 import './App.css';
 import "./index.css";
