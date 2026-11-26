@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import "./login.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+const API_URL = (
+  import.meta.env.VITE_IP_ELASTICA_URL || "https://44.197.89.200:3001"
+).replace(/\/$/, "");
 
 const Login = ({ setEstaAutenticado, setRol }) => {
   const navigate = useNavigate();
@@ -30,7 +32,6 @@ const Login = ({ setEstaAutenticado, setRol }) => {
         return;
       }
 
-      
       sessionStorage.setItem("user", JSON.stringify({
         id: data.id,
         nombre: data.nombre,
@@ -40,8 +41,7 @@ const Login = ({ setEstaAutenticado, setRol }) => {
       sessionStorage.setItem("token", data.token || data.id);
       sessionStorage.setItem("rol", data.rol);
       if (data.email) sessionStorage.setItem("userEmail", data.email);
-      
-      // 👉 ESTA ES LA LÍNEA CLAVE QUE HACE FUNCIONAR EL HISTORIAL DEL CLIENTE
+
       sessionStorage.setItem("id_usuario", data.id);
 
       setEstaAutenticado(true);
@@ -51,9 +51,9 @@ const Login = ({ setEstaAutenticado, setRol }) => {
       if (data.rol === 'administrador') {
         navigate('/admin');
       } else if (data.rol === 'tecnico') {
-        navigate('/tecnico'); 
+        navigate('/tecnico');
       } else {
-        navigate('/'); 
+        navigate('/');
       }
 
     } catch (err) {
@@ -69,13 +69,13 @@ const Login = ({ setEstaAutenticado, setRol }) => {
       <div className="ventana-login">
         <button className="btn-cerrar" onClick={() => navigate('/')}>✕</button>
         <h2>Iniciar Sesión</h2>
-        
+
         {error && <p style={{ color: 'red', backgroundColor: '#fee2e2', padding: '10px', borderRadius: '5px', textAlign: 'center' }}>{error}</p>}
 
         <form className="formulario-datos" onSubmit={handleLogin}>
           <label>Correo Electrónico *</label>
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          
+
           <label>Contraseña *</label>
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
 

@@ -72,7 +72,7 @@ const Index = ({ alHacerClickEnLogin }) => {
               <div className="card-img-overlay d-flex flex-column justify-content-end p-4 overlay-negro">
                 <h3 className="text-white h5 mb-2">Reparación de electrodomésticos</h3>
                 <p className="text-white-50 small mb-3">Servicio especializado</p>
-                <button onClick={()=>navigate('/infoUsuario')} className="btn btn-glass w-fit">Agendar servicio</button>
+                <button onClick={()=>navigate('/InfoUsuario')} className="btn btn-glass w-fit">Agendar servicio</button>
               </div>
             </div>
           </div>
@@ -108,7 +108,7 @@ const Index = ({ alHacerClickEnLogin }) => {
               <div className="card-img-overlay d-flex flex-column justify-content-end p-4 overlay-negro">
                 <h3 className="text-white h5 mb-2">Equipos Industriales</h3>
                 <p className="text-white-50 small mb-3">Alta capacidad</p>
-                <button onClick={()=>navigate('/infoUsuario')}  className="btn btn-glass w-fit">Ver servicios</button>
+                <button onClick={()=>navigate('/InfoUsuario')}  className="btn btn-glass w-fit">Ver servicios</button>
               </div>
             </div>
           </div>
@@ -122,7 +122,7 @@ const Index = ({ alHacerClickEnLogin }) => {
 <section className="seccion-final">
         <h4>Expertos en Reparación</h4>
         <p>Profesionales dedicados a brindar el mejor servicio de reparación</p>
-        <button onClick={()=>navigate('/infoUsuario')} className="btn-solicitar-final">
+        <button onClick={()=>navigate('/InfoUsuario')} className="btn-solicitar-final">
           Solicitar Servicio Ahora
         </button>
       </section>

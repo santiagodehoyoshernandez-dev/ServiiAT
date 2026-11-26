@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {fetchseguro} from "../../utils/fetchseguro"
+import { fetchseguro } from "../../utils/fetchseguro";
 
 const SolicitudesAdmin = () => {
   const [solicitudes, setSolicitudes] = useState([]);
@@ -23,7 +23,7 @@ const SolicitudesAdmin = () => {
     setCargando(true);
     setErrorServidor("");
     try {
-      const res = await fetch("http://localhost:3001/api/admin/solicitudes");
+      const res = await fetchseguro("/api/admin/solicitudes");
       const data = await res.json();
       if (!res.ok || !Array.isArray(data)) {
         setSolicitudes([]);
@@ -52,7 +52,7 @@ const SolicitudesAdmin = () => {
     const horaElegida = horasProgramadas[solicitud.id_solicitud] || "09:00";
 
     try {
-      const resUpdate = await fetch(`http://localhost:3001/api/admin/solicitudes/${solicitud.id_solicitud}/estado`, {
+      const resUpdate = await fetchseguro(`/api/admin/solicitudes/${solicitud.id_solicitud}/estado`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id_estado: estadoSeleccionado.id, nombre_estado: estadoSeleccionado.nombre })
@@ -61,7 +61,7 @@ const SolicitudesAdmin = () => {
       if (!resUpdate.ok) throw new Error(dataUpdate.error || "Error BD.");
 
       if (solicitud.email) {
-        const resNotif = await fetch("http://localhost:3001/api/notificaciones/enviar", {
+        const resNotif = await fetchseguro("/api/notificaciones/enviar", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

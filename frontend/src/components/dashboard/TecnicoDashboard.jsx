@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from 'react-router-dom';
-import { fetchseguro } from "../utils/fetchseguro";
-import "../index.css";
+import { fetchseguro } from "../../utils/fetchseguro";
+import "../../index.css";
 
 const TecnicoDashboard = () => {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const TecnicoDashboard = () => {
   const obtenerSolicitudes = useCallback(async ({ mostrarCarga = true } = {}) => {
     if (mostrarCarga) setCargando(true);
     try {
-      const res = await fetchseguro("http://localhost:3001/api/tecnico/solicitudes");
+      const res = await fetchseguro("/api/tecnico/solicitudes");
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || data.detalle || `Error al cargar solicitudes (${res.status}).`);
@@ -72,7 +72,7 @@ const TecnicoDashboard = () => {
 
   async function cambiarEstadoTrabajo(id, nombreEstado) {
     try {
-      const res = await fetchseguro(`http://localhost:3001/api/tecnico/solicitudes/${id}/estado`, {
+      const res = await fetchseguro(`/api/tecnico/solicitudes/${id}/estado`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json"
@@ -106,7 +106,7 @@ const TecnicoDashboard = () => {
 
     setGuardandoPrecioId(item.id);
     try {
-      const res = await fetchseguro(`http://localhost:3001/api/tecnico/solicitudes/${item.id}/precio`, {
+      const res = await fetchseguro(`/api/tecnico/solicitudes/${item.id}/precio`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json"

@@ -19,7 +19,7 @@ import RegistroAdmin from "./components/dashboard/RegistroAdmin";
 // Páginas principales
 import Index from './pages/index';
 import Login from './pages/login';
-import TecnicoDashboard from './pages/TecnicoDashboard';
+import TecnicoDashboard from './components/dashboard/TecnicoDashboard';
 import Registro from './pages/registro';
 import ServiciosNav from './pages/serviciosNav';
 import AcercaDeNosotros from './pages/acercaNosotros';

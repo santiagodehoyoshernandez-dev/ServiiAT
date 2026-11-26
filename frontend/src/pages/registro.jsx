@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import "./registro.css";
 
+const API_URL = (
+  import.meta.env.VITE_IP_ELASTICA_URL || "https://44.197.89.200:3001"
+).replace(/\/$/, "");
+
 const Registro = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -21,11 +25,24 @@ const Registro = () => {
     direccion: ""
   });
 
-  const handleChange = (campo) => (e) =>
+  const handleChange = (campo) => (e) => {
+    let valor = e.target.value;
+
+    // Solo letras, tildes, ñ y espacios para nombres y apellidos
+    if (['nombre_1', 'nombre_2', 'apellido_1', 'apellido_2'].includes(campo)) {
+      valor = valor.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+    }
+
+    // Solo números y máximo 10 dígitos para documento y teléfono
+    if (['documento', 'telefono'].includes(campo)) {
+      valor = valor.replace(/\D/g, '').slice(0, 10);
+    }
+
     setFormData({
       ...formData,
-      [campo]: e.target.value
+      [campo]: valor
     });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -53,7 +70,7 @@ const Registro = () => {
         direccion_comp: formData.direccion
       };
 
-      const resp = await fetch("http://localhost:3001/api/registro", {
+      const resp = await fetch(`${API_URL}/api/registro`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -136,7 +153,6 @@ const Registro = () => {
             onChange={handleChange('tipo_documento')}
           >
             <option value="CC">C.C.</option>
-      
           </select>
 
           <input

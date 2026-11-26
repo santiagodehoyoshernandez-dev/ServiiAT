@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import "../../pages/registro.css";
 import "../../pages/AdminRegistro.css";
-import {fetchseguro} from "../../utils/fetchseguro"
+import { fetchseguro } from "../../utils/fetchseguro";
 
 const RegistroAdmin = () => {
   const [loading, setLoading] = useState(false);
@@ -18,11 +18,24 @@ const RegistroAdmin = () => {
     email: "",
     telefono: "",
     direccion: "",
-    rol: "2" 
+    rol: "2"
   });
 
-  const handleChange = (campo) => (e) =>
-    setFormData({ ...formData, [campo]: e.target.value });
+  const handleChange = (campo) => (e) => {
+    let valor = e.target.value;
+
+    // Solo letras, tildes, ñ y espacios para nombres y apellidos
+    if (['nombre_1', 'nombre_2', 'apellido_1', 'apellido_2'].includes(campo)) {
+      valor = valor.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+    }
+
+    // Solo números y máximo 10 dígitos para documento y teléfono
+    if (['documento', 'telefono'].includes(campo)) {
+      valor = valor.replace(/\D/g, '').slice(0, 10);
+    }
+
+    setFormData({ ...formData, [campo]: valor });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,12 +57,10 @@ const RegistroAdmin = () => {
         rol: formData.rol
       };
 
-      
-      const resp = await fetchseguro("http://localhost:3001/api/admin/crear-usuario", {
+      const resp = await fetchseguro("/api/admin/crear-usuario", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${sessionStorage.getItem("token")}`
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(payload)
       });

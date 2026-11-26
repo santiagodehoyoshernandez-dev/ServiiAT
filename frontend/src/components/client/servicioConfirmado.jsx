@@ -29,7 +29,7 @@ function ServicioConfirmado() {
             }
 
             // Hacemos una única petición a tu backend en Node
-            const respuesta = await fetchseguro("http://localhost:3001/api/solicitud", {
+            const respuesta = await fetchseguro("/api/solicitud", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -51,16 +51,16 @@ function ServicioConfirmado() {
 
             // Notificación vía correo
             try {
-                await fetchseguro("http://localhost:3001/api/notificaciones/enviar", {
+                await fetchseguro("/api/notificaciones/enviar", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        nombreCliente: datos.nombreCliente, 
-                        email: datos.gmail, 
+                        nombreCliente: datos.nombreCliente,
+                        email: datos.gmail,
                         estado: "Pendiente",
-                        fecha_solicitud: datos.fecha, 
+                        fecha_solicitud: datos.fecha,
                         hora: datos.hora,
-                        descripcion: datos.descripcion, 
+                        descripcion: datos.descripcion,
                         nombre_equipo: datos.equipo
                     })
                 });
@@ -75,8 +75,12 @@ function ServicioConfirmado() {
                 confirmButtonColor: '#1abc9c'
             });
 
+            localStorage.removeItem("borrador_formulario_solicitud");
+            localStorage.removeItem("borrador_hora");
+            localStorage.removeItem("borrador_fecha");
+
             // Redirigir al usuario al Home después del éxito
-            navigate("/"); 
+            navigate("/");
 
         } catch (error) {
             console.error("Error en la confirmación:", error);
@@ -190,7 +194,7 @@ function ServicioConfirmado() {
                                     >
                                         Cancelar / Editar
                                     </button>
-                                    
+                                   
                                     <button
                                         onClick={confirmarReserva}
                                         className="btn btn-success py-3 px-5 rounded-3 fw-bold shadow"
@@ -206,7 +210,7 @@ function ServicioConfirmado() {
                 </div>
             </div>
         </section>
-    )
+    );
 }
 
 export default ServicioConfirmado;

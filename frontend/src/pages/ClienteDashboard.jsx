@@ -42,7 +42,7 @@ const ClienteDashboard = () => {
     }
 
     try {
-      const historialRes = await fetchseguro(`http://localhost:3001/api/cliente/solicitudes/${idUsuario}`);
+      const historialRes = await fetchseguro(`/api/cliente/solicitudes/${idUsuario}`);
 
       if (!historialRes.ok) {
         let mensajeError = `Error al cargar el historial (${historialRes.status}).`;
@@ -60,7 +60,7 @@ const ClienteDashboard = () => {
 
       // Consulta el modo de pago sin romper el historial si la ruta no está activa
       try {
-        const modoRes = await fetchseguro("http://localhost:3001/api/pagos/modo");
+        const modoRes = await fetchseguro("/api/pagos/modo");
         if (modoRes.ok) {
           const configuracionPago = await modoRes.json();
           if (["paypal", "deshabilitado"].includes(configuracionPago.modo)) {
@@ -89,7 +89,7 @@ const ClienteDashboard = () => {
 
     try {
       const res = await fetchseguro(
-        `http://localhost:3001/api/pagos/solicitudes/${item.id_solicitud}/paypal/capturar`,
+        `/api/pagos/solicitudes/${item.id_solicitud}/paypal/capturar`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -293,7 +293,7 @@ const ClienteDashboard = () => {
                               disabled={pagandoId === item.id_solicitud}
                               createOrder={async () => {
                                 const res = await fetchseguro(
-                                  `http://localhost:3001/api/pagos/solicitudes/${item.id_solicitud}/paypal/orden`,
+                                  `/api/pagos/solicitudes/${item.id_solicitud}/paypal/orden`,
                                   { method: "POST" }
                                 );
                                 const resultado = await res.json();

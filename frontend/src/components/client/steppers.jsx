@@ -8,7 +8,7 @@ const Stepper=()=>{
     if (localizacion.pathname === "/") pasoActual = 0;
 
     const pasos=[
-        {label:"Registrar solictud",icon:"bi bi-file-earmark-text"},
+        {label:"Registrar solicitud",icon:"bi bi-file-earmark-text"},
         {label:"Ingresa información",icon:"bi bi-info-circle "},
         {label:"Validar servicio",icon:"bi bi-clipboard-check"}
     ];

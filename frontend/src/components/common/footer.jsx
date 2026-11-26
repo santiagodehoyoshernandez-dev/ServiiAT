@@ -5,7 +5,7 @@ function Footer() {
   const currentYear = new Date().getFullYear();
 
   const clickBoton = () => {
-    window.open(`https://wa.me/57${technicianPhone}?text=Hola%20${encodeURIComponent(technicianName)},%20necesito%20información`, '_blank');
+    window.open(`https://wa.me/57${tecnicoCelular}?text=Hola%20${encodeURIComponent(tecnicoNombre)},%20necesito%20información`, '_blank');
   };
 
   return (

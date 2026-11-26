@@ -1,9 +1,13 @@
 import { Router } from 'express';
 import { crearSolicitud } from '../controllers/solicitudesController.js';
-import { verificarToken, permitirRoles } from '../seguridad/middlewareSeguridad.js';
+import { obtenerHorariosOcupados } from '../controllers/solicitudesController.js';
+
 
 const router = Router();
 
-router.post('/solicitud', verificarToken, permitirRoles('cliente', 'administrador'), crearSolicitud);
+
+router.post('/solicitud', crearSolicitud);
+router.get('/solicitudes/horarios-ocupados', obtenerHorariosOcupados);
+
 
 export default router;

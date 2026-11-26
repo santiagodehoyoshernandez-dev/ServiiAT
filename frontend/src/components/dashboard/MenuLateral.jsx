@@ -25,7 +25,7 @@ function MenuLateral() {
     sessionStorage.removeItem("user");
     sessionStorage.removeItem("id_usuario");
     sessionStorage.removeItem("userEmail");
-    window.location.href = "/Login";
+    navigate("/Login");
   };
 
   return (

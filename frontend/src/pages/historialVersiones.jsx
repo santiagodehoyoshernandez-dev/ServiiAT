@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import "../index.css"; 
-import {fetchseguro} from "../utils/fetchseguro"
+import "../index.css";
+import { fetchseguro } from "../utils/fetchseguro";
 
 function HistorialVersiones() {
   const [versiones, setVersiones] = useState([]);
@@ -15,12 +15,10 @@ function HistorialVersiones() {
     console.log("📍 PASO 1: Iniciando petición al backend...");
     try {
       setCargando(true);
-      
-      const respuesta = await fetchseguro("http://localhost:3001/api/admin/solicitudes", {
-        headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` }
-      });
+
+      const respuesta = await fetchseguro("/api/admin/solicitudes");
       console.log("📍 PASO 2: Respuesta recibida. Status:", respuesta.status);
-      
+
       if (!respuesta.ok) {
         throw new Error(`Error HTTP: ${respuesta.status}`);
       }
@@ -46,7 +44,7 @@ function HistorialVersiones() {
 
       console.log("📍 PASO 4: Datos adaptados correctamente:", datosAdaptados);
       setVersiones(datosAdaptados);
-      
+
     } catch (error) {
       console.error("❌ ERROR GRAVE EN LA PETICIÓN:", error);
     } finally {
@@ -106,7 +104,7 @@ function HistorialVersiones() {
                   <span className="badge bg-secondary mb-2">{item.estado}</span>
                   <h6 className="card-subtitle mb-2 text-muted">{item.fecha}</h6>
                   <p className="card-text small">{item.descripcion}</p>
-                  <hr/>
+                  <hr />
                   <p className="mb-0 small"><strong>Cliente:</strong> {item.cliente}</p>
                 </div>
               </div>

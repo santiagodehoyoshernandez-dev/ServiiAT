@@ -36,8 +36,8 @@ const AdminDashboard = () => {
     setErrorServidor("");
     try {
       const [resSolicitudes, resTecnicos] = await Promise.all([
-        fetchseguro("http://localhost:3001/api/admin/solicitudes"),
-        fetchseguro("http://localhost:3001/api/admin/tecnicos")
+        fetchseguro("/api/admin/solicitudes"),
+        fetchseguro("/api/admin/tecnicos")
       ]);
       const [dataSolicitudes, dataTecnicos] = await Promise.all([
         resSolicitudes.json(),
@@ -80,7 +80,7 @@ const AdminDashboard = () => {
 
     try {
       const res = await fetchseguro(
-        `http://localhost:3001/api/admin/solicitudes/${idSolicitud}/decision`,
+        `/api/admin/solicitudes/${idSolicitud}/decision`,
         {
           method: "PUT",
           headers: {
@@ -109,7 +109,7 @@ const AdminDashboard = () => {
       setMensajeAccion(resultado.mensaje || `Solicitud #${idSolicitud} actualizada.`);
 
       if (solicitud.email) {
-        const resNotificacion = await fetchseguro("http://localhost:3001/api/notificaciones/enviar", {
+        const resNotificacion = await fetchseguro("/api/notificaciones/enviar", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

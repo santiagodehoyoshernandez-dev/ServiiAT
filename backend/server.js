@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import https from 'https';
+import fs from 'fs';
 
 // 1. IMPORTAMOS TODAS LAS RUTAS
 import authRoutes from './routes/authRoutes.js';
@@ -22,7 +24,7 @@ if (!process.env.JWT_TOKEN) {
 
 // Orígenes permitidos desde .env (separados por coma) con respaldo local
 const origenesPermitidos = (
-  process.env.CORS_ORIGINS || 'http://localhost:5173'
+  process.env.CORS_ORIGINS || 'https://localhost:5173'
 ).split(',').map((origen) => origen.trim());
 
 // 2. MIDDLEWARES GENERALES
@@ -76,7 +78,12 @@ app.use((err, req, res, next) => {
 });
 
 // 6. INICIAR EL SERVIDOR
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Servidor Core corriendo en el puerto ${PORT}`);
+const opcionesSSL = {
+  key: fs.readFileSync(new URL('../certs/localhost.key', import.meta.url)),
+  cert: fs.readFileSync(new URL('../certs/localhost.crt', import.meta.url))
+};
+
+https.createServer(opcionesSSL, app).listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Servidor Core corriendo en HTTPS en el puerto ${PORT}`);
   console.log(`🌐 Orígenes CORS permitidos: ${origenesPermitidos.join(', ')}`);
 });

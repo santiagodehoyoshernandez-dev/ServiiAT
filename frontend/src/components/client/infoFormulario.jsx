@@ -7,7 +7,7 @@ function InformacionPaso1(){
             <div className="container py-5 text-center">
                 <div className="row g-4 justify-content-center">
                 <div className="text-center mb-4">
-                    <p className="py-3 text-dark">Sigue los pasos para completar tu solitud de servicio</p>
+                    <p className="py-3 text-dark">Sigue los pasos para completar tu solicitud de servicio</p>
                 </div>
 
           
@@ -18,7 +18,7 @@ function InformacionPaso1(){
                 <div className="card shadow-lg border-0 rounded-4 p-4" style={{ maxWidth: "600px", width: "100%" }}>
 
                     <div className="card-body text-center">
-                        <h6 className="card-title fw-bold mb-3">Registrar solictud de servicio</h6>
+                        <h6 className="card-title fw-bold mb-3">Registrar solicitud de servicio</h6>
                         <p className="card-text text-muted mb-4">
                         Estas a punto de de solicitar un servicio. Haz click en continuar para 
                         proceder.

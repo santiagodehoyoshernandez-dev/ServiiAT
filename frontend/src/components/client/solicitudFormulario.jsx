@@ -3,32 +3,86 @@ import { Cpu, Fan } from 'lucide-react';
 import 'react-calendar/dist/Calendar.css';
 import Calendar from 'react-calendar';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-
+import { useState, useEffect } from 'react';
+import { fetchseguro } from '../../utils/fetchseguro';
 
 function Formulario() {
     const [appliance, setAppliance] = useState("");
     const navigate = useNavigate();
 
-    const [datosValidar, setDatosValidar] = useState({
-        equipo: "",
-        categoria: "Industrial",
-        nombreCliente: "",
-        apellidoCliente: "",
-        gmail: "",
-        telefono: "",
-        direccion: "",
-        descripcion: "",
-        modelo: ""
+    // 1. Recuperar datos del formulario con JSON nativo
+    const [datosValidar, setDatosValidar] = useState(() => {
+        const borradorGuardado = localStorage.getItem("borrador_formulario_solicitud");
+        return borradorGuardado ? JSON.parse(borradorGuardado) : {
+            equipo: "",
+            categoria: "Industrial",
+            nombreCliente: "",
+            apellidoCliente: "",
+            gmail: "",
+            telefono: "",
+            direccion: "",
+            descripcion: "",
+            modelo: ""
+        };
     });
 
-    const [horaSeleccionada, setHoraSeleccionada] = useState("");
+    const [horaSeleccionada, setHoraSeleccionada] = useState(() => {
+        return localStorage.getItem("borrador_hora") || "";
+    });
+
     const horarios = [
         "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM",
         "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM"
     ];
 
-    const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date());
+    const [fechaSeleccionada, setFechaSeleccionada] = useState(() => {
+        const fechaGuardada = localStorage.getItem("borrador_fecha");
+        return fechaGuardada ? new Date(fechaGuardada) : new Date();
+    });
+
+    // 2. Estados para manejar los horarios ocupados traídos del backend
+    const [fechasOcupadas, setFechasOcupadas] = useState([]);
+
+    // 3. Cargar los horarios ocupados desde el backend al montar el componente
+    useEffect(() => {
+        const cargarHorariosOcupados = async () => {
+            try {
+                const res = await fetchseguro("/api/solicitudes/horarios-ocupados");
+                if (res.ok) {
+                    const data = await res.json();
+                    setFechasOcupadas(data);
+                }
+            } catch (error) {
+                console.error("Error cargando disponibilidad:", error);
+            }
+        };
+        cargarHorariosOcupados();
+    }, []);
+
+    // 4. Sincronizar borradores con localStorage
+    useEffect(() => {
+        localStorage.setItem("borrador_formulario_solicitud", JSON.stringify(datosValidar));
+    }, [datosValidar]);
+
+    useEffect(() => {
+        localStorage.setItem("borrador_hora", horaSeleccionada);
+    }, [horaSeleccionada]);
+
+    useEffect(() => {
+        localStorage.setItem("borrador_fecha", fechaSeleccionada.toISOString());
+    }, [fechaSeleccionada]);
+
+    // 5. Calcular horas ocupadas para el día actual seleccionado
+    const fechaIsoActual = fechaSeleccionada.toISOString().split('T')[0];
+    const registroDelDia = fechasOcupadas.find(item => item.fecha === fechaIsoActual);
+    const horasOcupadasHoy = registroDelDia ? registroDelDia.horas : [];
+
+    // Si cambia de día y la hora seleccionada ya está ocupada, limpiarla
+    useEffect(() => {
+        if (horasOcupadasHoy.includes(horaSeleccionada)) {
+            setHoraSeleccionada("");
+        }
+    }, [fechaSeleccionada, fechasOcupadas]);
 
     const reservado = [
         { id: 1, Date: new Date(2026, 3, 25) },
@@ -47,7 +101,15 @@ function Formulario() {
 
     const manejarCambio = (e) => {
         const { name, value } = e.target;
-        setDatosValidar(prev => ({ ...prev, [name]: value }));
+        let valorFiltrado = value;
+
+        if (name === "nombreCliente" || name === "apellidoCliente") {
+            valorFiltrado = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "");
+        } else if (name === "telefono") {
+            valorFiltrado = value.replace(/[^0-9]/g, "").slice(0, 10);
+        }
+
+        setDatosValidar(prev => ({ ...prev, [name]: valorFiltrado }));
     };
 
     const manejarEnvio = async (e) => {
@@ -64,66 +126,21 @@ function Formulario() {
             return;
         }
 
+        // Doble validación por seguridad antes de pasar a la vista de validación
+        if (horasOcupadasHoy.includes(horaSeleccionada)) {
+            Swal.fire("Horario no disponible", "Lo sentimos, esta hora ya fue reservada por otro usuario.", "error");
+            return;
+        }
+
         // Estructuramos los datos completos que necesita la vista de confirmación
         const datosCompletos = {
             ...datosValidar,
-            fecha: fechaSeleccionada.toISOString().split('T')[0],
+            fecha: fechaIsoActual,
             hora: horaSeleccionada,
             servicio: appliance
         };
 
-        // Pasamos a la vista de validación enviando los datos por el state
         navigate("/ValidarInformacion", { state: datosCompletos });
-
-        /* 
-        ===============================================================
-        CÓDIGO COMENTADO: CONEXIÓN CON MYSQL WORKBENCH Y LOCALHOST
-        ===============================================================
-        const idEstadoPendiente = 1; // Asumiendo ID por defecto
-        const idCategoria = 1; // Asumiendo ID por defecto
-        const idAdministrador = 1;
-
-        const datosParaMySQL = {
-            nombre_equipo: datosValidar.equipo,
-            modelo_equipo: datosValidar.modelo || "N/A",
-            id_categoria_equipo: idCategoria,
-            fecha_solicitud: fechaSeleccionada.toISOString().split('T')[0],
-            descripcion: datosValidar.descripcion,
-            direccion_servicio: datosValidar.direccion,
-            usuario_id_cliente: userGuardado.id, 
-            id_estado_solicitud: idEstadoPendiente,
-            usuario_id_administrador: idAdministrador
-        };
-
-        try {
-            const respuesta = await fetch('http://localhost:3001/api/solicitud', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(datosParaMySQL)
-            });
-
-            const resultado = await respuesta.json();
-            if (!respuesta.ok) throw new Error(resultado.error || "Error al guardar localmente");
-
-            // Enviar notificación
-            const datosNotificaciones = { email: datosValidar.gmail, estado: "Pendiente" };
-            await fetch('http://localhost:3001/api/notificaciones/enviar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(datosNotificaciones)
-            });
-
-            await Swal.fire({
-                icon: "success",
-                title: "¡Guardado en MySQL Workbench!",
-                text: "La solicitud de servicio se registró correctamente de forma local.",
-                confirmButtonColor: '#2563eb'
-            });
-        } catch(error) {
-            console.error("Error MySQL:", error);
-        }
-        ===============================================================
-        */
     };
 
     return (
@@ -206,14 +223,27 @@ function Formulario() {
                                 <div className="col-lg-5 mt-4">
                                     <p className="fw-bold text-center mb-2">Horario de Atención</p>
                                     <div className="row g-2">
-                                        {horarios.map((h) => (
-                                            <div key={h} className="col-6 col-md-4 col-lg-6">
-                                                <button type="button" onClick={() => setHoraSeleccionada(h)}
-                                                    className={`btn btn-sm w-100 ${horaSeleccionada === h ? 'btn-primary' : 'btn-outline-primary bg-white'}`}>
-                                                    {h}
-                                                </button>
-                                            </div>
-                                        ))}
+                                        {horarios.map((h) => {
+                                            const estaOcupada = horasOcupadasHoy.includes(h);
+                                            return (
+                                                <div key={h} className="col-6 col-md-4 col-lg-6">
+                                                    <button
+                                                        type="button"
+                                                        disabled={estaOcupada}
+                                                        onClick={() => setHoraSeleccionada(h)}
+                                                        className={`btn btn-sm w-100 ${
+                                                            estaOcupada
+                                                                ? 'btn-secondary opacity-50 text-decoration-line-through'
+                                                                : horaSeleccionada === h
+                                                                    ? 'btn-primary'
+                                                                    : 'btn-outline-primary bg-white'
+                                                        }`}
+                                                    >
+                                                        {h} {estaOcupada ? '(Ocupado)' : ''}
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
 

@@ -54,7 +54,7 @@ function PerfilUsuario() {
         if (id) params.append("id", id);
         if (email) params.append("email", email);
 
-        const respuesta = await fetchseguro(`http://localhost:3001/api/perfil?${params.toString()}`);
+        const respuesta = await fetchseguro(`/api/perfil?${params.toString()}`);
         const resultado = await respuesta.json();
         if (!respuesta.ok) throw new Error(resultado.error || "No se pudo cargar el perfil.");
         setPerfil(resultado.perfil);
@@ -81,7 +81,7 @@ function PerfilUsuario() {
 
     try {
       const { id, email } = obtenerIdentificador();
-      const respuesta = await fetchseguro("http://localhost:3001/api/perfil", {
+      const respuesta = await fetchseguro("/api/perfil", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json"
