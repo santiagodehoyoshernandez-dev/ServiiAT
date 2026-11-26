@@ -3,6 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import https from 'https';
 import fs from 'fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 // 1. IMPORTAMOS TODAS LAS RUTAS
 import authRoutes from './routes/authRoutes.js';
@@ -14,6 +16,10 @@ import clienteRoutes from './routes/clienteRoutes.js';
 import pagosRoutes from './routes/pagosRoutes.js';
 import perfilRoutes from './routes/perfilRoutes.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const frontendDist = path.resolve(__dirname, '../frontend/dist');
+
 const app = express();
 const PORT = process.env.PORT || 4000;
 
@@ -22,17 +28,24 @@ if (!process.env.JWT_TOKEN) {
   console.warn('⚠️ ADVERTENCIA: Falta definir JWT_TOKEN en backend/.env');
 }
 
-// Orígenes permitidos desde .env (separados por coma) con respaldo para AWS y local
-const origenesPermitidos = (
+// Orígenes permitidos desde .env + mismo puerto 4000 para peticiones POST/PUT/DELETE
+const origenesEnv = (
   process.env.CORS_ORIGINS || 'http://localhost:8080,https://44.197.89.200:8080'
-).split(',').map((origen) => origen.trim());
+).split(',').map((origen) => origen.trim()).filter(Boolean);
+
+const origenesPermitidos = Array.from(new Set([
+  ...origenesEnv,
+  `https://44.197.89.200:${PORT}`,
+  `http://localhost:${PORT}`,
+  `https://localhost:${PORT}`
+]));
 
 // 2. MIDDLEWARES GENERALES
 app.disable('x-powered-by');
 app.use(express.json());
 app.use(cors({
   origin: (origin, callback) => {
-    // Permite peticiones sin origin (Postman, curl, chequeos de salud) o desde orígenes autorizados
+    // Permite peticiones sin origin (Postman, curl, navegación directa) o desde orígenes autorizados
     if (!origin || origenesPermitidos.includes(origin)) {
       return callback(null, true);
     }
@@ -44,14 +57,14 @@ app.use(cors({
 }));
 
 // Ruta de verificación de estado (health check)
-app.get('/', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({
     ok: true,
     mensaje: 'Servidor Core de ServiAT funcionando con Arquitectura Modular 🚀'
   });
 });
 
-// 3. ENRUTAMIENTO PRINCIPAL
+// 3. ENRUTAMIENTO PRINCIPAL DE LA API
 app.use('/api', authRoutes);
 app.use('/api', solicitudRoutes);
 app.use('/api', adminRoutes);
@@ -61,7 +74,25 @@ app.use('/api/cliente', clienteRoutes);
 app.use('/api/pagos', pagosRoutes);
 app.use('/api/perfil', perfilRoutes);
 
-// 4. RUTA NO ENCONTRADA (404) EN FORMATO JSON
+// 4. RUTA NO ENCONTRADA (404) PARA LA API
+app.use('/api', (req, res) => {
+  res.status(404).json({
+    error: `Ruta no encontrada: ${req.method} ${req.originalUrl}`
+  });
+});
+
+// 4.5 SERVIR EL FRONTEND COMPILADO EN EL MISMO PUERTO
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+  app.use((req, res, next) => {
+    if (req.method === 'GET') {
+      return res.sendFile(path.join(frontendDist, 'index.html'));
+    }
+    next();
+  });
+}
+
+// 4.6 RUTA NO ENCONTRADA GENERAL
 app.use((req, res) => {
   res.status(404).json({
     error: `Ruta no encontrada: ${req.method} ${req.originalUrl}`
