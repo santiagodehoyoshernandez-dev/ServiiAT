@@ -1,8 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import https from 'https';
-import fs from 'fs';
 
 // 1. IMPORTAMOS TODAS LAS RUTAS
 import authRoutes from './routes/authRoutes.js';
@@ -15,16 +13,16 @@ import pagosRoutes from './routes/pagosRoutes.js';
 import perfilRoutes from './routes/perfilRoutes.js';
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 4000;
 
 // Verificación rápida al iniciar el servidor
 if (!process.env.JWT_TOKEN) {
-  console.warn(' ADVERTENCIA: Falta definir JWT_TOKEN en backend/.env');
+  console.warn('⚠️ ADVERTENCIA: Falta definir JWT_TOKEN en backend/.env');
 }
 
-// Orígenes permitidos desde .env (separados por coma) con respaldo local
+// Orígenes permitidos desde .env (separados por coma) con respaldo para AWS y local
 const origenesPermitidos = (
-  process.env.CORS_ORIGINS || 'https://localhost:5173'
+  process.env.CORS_ORIGINS || 'http://44.197.89.200:8080,http://localhost:5173'
 ).split(',').map((origen) => origen.trim());
 
 // 2. MIDDLEWARES GENERALES
@@ -77,13 +75,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 6. INICIAR EL SERVIDOR
-const opcionesSSL = {
-  key: fs.readFileSync(new URL('../certs/localhost.key', import.meta.url)),
-  cert: fs.readFileSync(new URL('../certs/localhost.crt', import.meta.url))
-};
-
-https.createServer(opcionesSSL, app).listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Servidor Core corriendo en HTTPS en el puerto ${PORT}`);
+// 6. INICIAR EL SERVIDOR (HTTP expuesto a toda la red en 0.0.0.0)
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Servidor Core corriendo en HTTP en el puerto ${PORT}`);
   console.log(`🌐 Orígenes CORS permitidos: ${origenesPermitidos.join(', ')}`);
 });
