@@ -28,6 +28,7 @@ import Configuracion from "./pages/Configuracion";
 import AdminDashboard from "./components/dashboard/AdminDashboard"; 
 import HistorialVersiones from "./pages/historialVersiones";
 import PerfilUsuario from "./pages/PerfilUsuario";
+import RecuperarContrasena from "./componentes/recuperar_contrasena";
 
 import './App.css';
 import "./index.css";
@@ -108,6 +109,7 @@ function AppContent() {
           <Route path="/Login" element={estaAutenticado ? <Navigate to="/" replace /> : <Login setEstaAutenticado={setEstaAutenticado} setRol={setRol} />} />
           <Route path="/Registro" element={estaAutenticado ? <Navigate to="/" replace /> : <Registro />} />
           <Route path="/perfil" element={estaAutenticado ? <PerfilUsuario /> : <Navigate to="/Login" replace />} />
+          <Route path="/recuperar-contrasena" element={<RecuperarContrasena />} />
           
           {/* RUTAS EXCLUSIVAS DEL CLIENTE */}
           <Route path="/infoUsuario" element={estaAutenticado && (!rol || rol === 'cliente') ? <InformacionPaso1 /> : <Navigate to="/Login" />} />

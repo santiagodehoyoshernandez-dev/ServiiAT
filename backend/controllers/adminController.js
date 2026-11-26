@@ -1,5 +1,16 @@
 import { supabase } from '../config/supabase.js';
 import bcrypt from "bcryptjs";
+import nodemailer from 'nodemailer';
+
+
+// enviar credenciales
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
 
 
 // 1. OBTENER SOLICITUDES (ADMIN)
@@ -277,6 +288,7 @@ export const registrarUsuarioPorAdmin = async (req, res) => {
   }
 
   const prefijo = id_roles === 2 ? "Tech" : "Admin";
+  const nombreRol = id_roles === 2 ? "Técnico" : "Administrador";
   const passwordTemporal = `${prefijo}-${Math.random().toString(36).slice(-6)}*`;
 
   const salt = bcrypt.genSaltSync(10);
@@ -295,15 +307,37 @@ export const registrarUsuarioPorAdmin = async (req, res) => {
     if (errUser) throw errUser;
     const nuevoId = resultUser[0].id_usuario;
 
-    await Promise.all([
-      supabase.from('correo_electronico').insert([{ direccion_email: email, tipo: 'Laboral', id_usuario: nuevoId }]),
+    const [resCorreo, resTel, resDir] = await Promise.all([
+      supabase.from('correo_electronico').insert([{ direccion_email: email.trim(), tipo: 'Laboral', id_usuario: nuevoId }]),
       supabase.from('telefono').insert([{ numero: numero_tel, tipo: 'Celular', id_usuario: nuevoId }]),
       supabase.from('direccion').insert([{ direccion_completa: direccion_comp, usuario_id_usuario: nuevoId }])
     ]);
+
+    if (resCorreo.error || resTel.error || resDir.error) {
+      throw new Error("Error al guardar correo, teléfono o dirección.");
+    }
+
+    // Enviar las credenciales al correo del empleado
+    await transporter.sendMail({
+      from: `"Administración del Sistema" <${process.env.GMAIL_USER}>`,
+      to: email.trim(),
+      subject: `Bienvenido - Tus credenciales de acceso (${nombreRol})`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+          <h2 style="color: #E57373;">Bienvenido, ${nombre_1} ${apellido_1 || ''}</h2>
+          <p>Se ha creado tu cuenta con el rol de <strong>${nombreRol}</strong>. Usa estas credenciales para iniciar sesión en la plataforma:</p>
+          <div style="background-color: #f9fafb; padding: 15px; border-radius: 6px; margin: 15px 0;">
+            <p style="margin: 5px 0;"><strong>Correo:</strong> ${email.trim()}</p>
+            <p style="margin: 5px 0;"><strong>Contraseña temporal:</strong> ${passwordTemporal}</p>
+          </div>
+          <p style="font-size: 12px; color: #777;">Te recomendamos cambiar esta contraseña desde la opción "¿Olvidaste tu contraseña?" en el inicio de sesión.</p>
+        </div>
+      `,
+    });
+
+    console.log(`✅ Empleado creado y correo enviado a: ${email} | Clave temporal: ${passwordTemporal}`);
     
-    console.log(`✅ Empleado creado. Correo: ${email} | Clave temporal: ${passwordTemporal}`);
-    
-    res.json({ mensaje: "Usuario creado y credenciales generadas exitosamente." });
+    res.json({ mensaje: "Usuario creado y credenciales enviadas al correo exitosamente." });
 
   } catch (error) {
     console.error("❌ Error al registrar empleado:", error);

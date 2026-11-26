@@ -2,10 +2,6 @@ import { supabase } from '../config/supabase.js';
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
 
-
-
-
-
 export const registro = async (req, res) => {
   const { 
     nombre_1, nombre_2, apellido_1, apellido_2,
@@ -13,8 +9,6 @@ export const registro = async (req, res) => {
     email, numero_tel, direccion_comp, 
   } = req.body;
   const id_roles = 1;
-
-
 
   const salt = bcrypt.genSaltSync(10);
   const claveHasheada = bcrypt.hashSync(clave.trim(), salt);
@@ -93,5 +87,46 @@ export const login = async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+}; 
+
+export const recuperarcontrasena = async (req, res) => {
+  const { email, nuevaPassword } = req.body;
+
+  if (!email || !nuevaPassword) {
+    return res.status(400).json({ mensaje: 'Completa todos los campos.' });
+  }
+
+  try {
+    // 1. Verificar que el correo exista en Supabase
+    const { data: usuario, error } = await supabase
+      .from('usuario')
+      .select(`
+        id_usuario,
+        correo_electronico!inner(direccion_email)
+      `)
+      .eq('correo_electronico.direccion_email', email.trim())
+      .single();
+
+    if (error || !usuario) {
+      return res.status(404).json({ mensaje: 'No existe una cuenta registrada con ese correo.' });
+    }
+
+    // 2. Encriptar la nueva clave igual que en tu registro
+    const salt = bcrypt.genSaltSync(10);
+    const claveHasheada = bcrypt.hashSync(nuevaPassword.trim(), salt);
+
+    // 3. Actualizar la columna 'clave' en la tabla 'usuario'
+    const { error: errorUpdate } = await supabase
+      .from('usuario')
+      .update({ clave: claveHasheada })
+      .eq('id_usuario', usuario.id_usuario);
+
+    if (errorUpdate) throw errorUpdate;
+
+    res.json({ mensaje: 'Contraseña actualizada correctamente.' });
+  } catch (err) {
+    console.error('Error al actualizar contraseña:', err);
+    res.status(500).json({ mensaje: 'Error interno al cambiar la contraseña.' });
   }
 };

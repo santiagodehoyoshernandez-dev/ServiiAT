@@ -64,13 +64,17 @@ const Login = ({ setEstaAutenticado, setRol }) => {
     }
   };
 
-  return (
+return (
     <div className="modal-overlay" style={{ zIndex: 1050 }}>
       <div className="ventana-login">
         <button className="btn-cerrar" onClick={() => navigate('/')}>✕</button>
         <h2>Iniciar Sesión</h2>
 
-        {error && <p style={{ color: 'red', backgroundColor: '#fee2e2', padding: '10px', borderRadius: '5px', textAlign: 'center' }}>{error}</p>}
+        {error && (
+          <p style={{ color: 'red', backgroundColor: '#fee2e2', padding: '10px', borderRadius: '5px', textAlign: 'center' }}>
+            {error}
+          </p>
+        )}
 
         <form className="formulario-datos" onSubmit={handleLogin}>
           <label>Correo Electrónico *</label>
@@ -79,10 +83,29 @@ const Login = ({ setEstaAutenticado, setRol }) => {
           <label>Contraseña *</label>
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
 
+          <button
+            type="button"
+            onClick={() => navigate('/recuperar-contrasena')}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#E57373',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              alignSelf: 'flex-end',
+              padding: 0,
+              marginBottom: '12px',
+              fontSize: '0.9rem'
+            }}
+          >
+            ¿Olvidaste tu contraseña?
+          </button>
+
           <button type="submit" className="btn-enviar-login" disabled={loading}>
             {loading ? 'Ingresando...' : 'Ingresar al Sistema'}
           </button>
         </form>
+
         <p className="footer-link" onClick={() => navigate('/registro')} style={{ marginTop: '15px', cursor: 'pointer' }}>
           ¿No tienes cuenta? <span style={{ color: '#E57373', fontWeight: 'bold' }}>Regístrate aquí</span>
         </p>
